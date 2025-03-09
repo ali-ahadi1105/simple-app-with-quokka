@@ -22,6 +22,7 @@ func initApplication() *application {
 	}
 
 	quo.AppName = "myApp"
+	quo.InfoLog.Println("Debug is set to " ,quo.Debug)
 	quo.Debug = true
 
 	app := &application{
