@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ali-ahadi1105/Quokka/render"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 )
@@ -21,6 +22,7 @@ type Quokka struct {
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
 	RootPath string
+	Render   *render.Render
 	Routes   *chi.Mux
 	config   config
 }
@@ -52,7 +54,7 @@ func (q *Quokka) New(rootPath string) error {
 		return err
 	}
 
-	// create loggers
+	// create loggers and another configuration of quokka framework
 	infoLog, errorLog := q.startLoggers()
 	q.InfoLog = infoLog
 	q.ErrorLog = errorLog
@@ -65,6 +67,8 @@ func (q *Quokka) New(rootPath string) error {
 		port:     os.Getenv("PORT"),
 		renderer: os.Getenv("RENDERER"),
 	}
+
+	q.Render = q.createRenderer(q)
 
 	return nil
 }
@@ -98,10 +102,11 @@ func (q *Quokka) startLoggers() (*log.Logger, *log.Logger) {
 	return infoLog, errorLog
 }
 
+// listening to server
 func (q *Quokka) ListenAndServe() {
 	serv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
-		Handler:      q.routes(),
+		Handler:      q.Routes,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
@@ -109,4 +114,14 @@ func (q *Quokka) ListenAndServe() {
 	q.InfoLog.Printf("Listening to port: %s", os.Getenv("PORT"))
 	err := serv.ListenAndServe()
 	q.ErrorLog.Fatal(err)
+}
+
+// create render engine
+func (q *Quokka) createRenderer(quo *Quokka) *render.Render {
+	myRenderer := render.Render{
+		RootPath: quo.RootPath,
+		Port:     quo.config.port,
+		Renderer: quo.config.renderer,
+	}
+	return &myRenderer
 }

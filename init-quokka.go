@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"myApp/handlers"
 	"os"
 
 	quokka "github.com/ali-ahadi1105/Quokka"
@@ -22,12 +23,18 @@ func initApplication() *application {
 	}
 
 	quo.AppName = "myApp"
-	quo.InfoLog.Println("Debug is set to " ,quo.Debug)
-	quo.Debug = true
+	quo.InfoLog.Println("Debug is set to ", quo.Debug)
 
-	app := &application{
+	handlers := &handlers.Handlers{
 		App: quo,
 	}
+
+	app := &application{
+		App:      quo,
+		Handlers: handlers,
+	}
+
+	app.App.Routes = app.routes()
 
 	return app
 }
